@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+    uuid        String  @id @unique
+    name        String
+    email       String  @unique
+    password    String
+    phoneNumber String
+    role        String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    userSession UserSession[]
+}
+
+model UserSession {
+    uuid         String  @id @unique
+    userUuid     String
+    refreshToken String
+
+    ip           String    
+
+    clientType       String
+    clientDeviceModel       String
+    clientOS       String
+    clientApp      String
+
+    user         User    @relation(fields: [userUuid], references: [uuid], onDelete: Cascade)
+    
+    expiresAt    DateTime 
+    lastActiveAt DateTime
+    createdAt    DateTime @default(now())
+
+}
+
+model DrinkCatalog {
+    uuid         String @id @unique
+    GTIN         String @unique
+
+    name         String
+    series       String?
+    brand        String
+    description  String
+    manufacturer String
+    
+    volume       Int
+    price        Int
+
+    createdAt     DateTime @default(now())
+
+    DrinkBatch DrinkBatch[]
+
+}
+
+model DrinkBatch { 
+    uuid         String @id @unique
+
+    drinkUuid    String 
+    drinkCatalog DrinkCatalog @relation(fields: [drinkUuid], references: [uuid], onDelete: Cascade)
+
+    quantity     Int
+
+    createdAt     DateTime
+    expiresAt    DateTime 
+
+}
